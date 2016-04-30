@@ -1,5 +1,8 @@
 #winter training project
-from flask import Flask, render_template
+
+import MySQLdb
+
+from flask import Flask, render_template, request, json
 from flask_admin import Admin, BaseView, expose
 from flask.ext.admin.contrib.fileadmin import FileAdmin
 import os.path as op
@@ -30,9 +33,31 @@ def get_register():
 
 @app.route("/register", methods=['POST'])
 def post_register():
-	#temporary
-	return render_template('register.html')
+	#read the values posted by html form
+	name = request.form['inputName']
+	email = request.form['inputEmail']
+	password = request.form['inputPassword']
 
+	#validate the received values, i.e. check if they exist
+	# if( name and email and password ):
+	# 	return json.dumps({'status': 1})
+	# else:
+	# 	return json.dumps({'status': 0})
+
+	#make connection to database
+	db = MySQLdb.connect(host="localhost", user="root", passwd="root", db="filebox")
+	# you must create a Cursor object to let you execute queries
+	cur = db.cursor()
+	cur.execute("""INSERT INTO USERS (NAME, EMAIL, PASSWORD) VALUES (%s, %s, %s )""", (name, email, password) )
+	
+	# cur.execute("SELECT VERSION()")
+	# # Fetch a single row using fetchone() method.
+	# data = cur.fetchone()
+	# print "Database version : %s " % data
+	db.commit()
+	cur.close()
+	db.close()
+	return render_template('home.html', name=name)
 
 @app.route("/login")
 def get_login():
