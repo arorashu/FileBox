@@ -24,7 +24,22 @@ class PageView(BaseView):
 def main():
 	return render_template('index.html')
 
-admin.add_view(FileAdmin(path+'/images/')) 
+@app.route("/register", methods=['GET'])
+def get_register():
+	return render_template('register.html')
+
+@app.route("/register", methods=['POST'])
+def post_register():
+	#temporary
+	return render_template('register.html')
+
+
+@app.route("/login")
+def get_login():
+	return render_template('login.html')
+
+
+admin.add_view(FileAdmin(path+'/files/' , name='Files'))  
 
 if __name__ == '__main__':
 	app.run()
