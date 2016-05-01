@@ -2,7 +2,7 @@
 
 import MySQLdb
 
-from flask import Flask, render_template, request, json
+from flask import Flask, render_template, request, json, redirect
 from flask_admin import Admin, BaseView, expose
 from flask.ext.admin.contrib.fileadmin import FileAdmin
 import os
@@ -59,7 +59,14 @@ def get_login():
 # def post_login():
 # 	return 
 
-# @app.route("/view")
+@app.route("/mydrive", methods=['GET'])
+def mydrive_get():
+ 	return render_template('mydrive.html')
+
+@app.route("/mydrive", methods=['POST'])
+def mydrive_post():
+	name = request.form['inputName']
+	return redirect('/admin/fileadmin/b/'+name)
 
 def add_user(name, email, password):
 	#make connection to database
