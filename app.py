@@ -5,6 +5,7 @@ import MySQLdb
 from flask import Flask, render_template, request, json
 from flask_admin import Admin, BaseView, expose
 from flask.ext.admin.contrib.fileadmin import FileAdmin
+import os
 import os.path as op
 path = op.join(op.dirname(__file__),'static')
 
@@ -44,12 +45,28 @@ def post_register():
 	# else:
 	# 	return json.dumps({'status': 0})
 
+	add_user(name, email, password)
+	create_user_folder(name)
+
+	return render_template('home.html', name=name)
+
+
+@app.route("/login", methods=['GET'])
+def get_login():
+	return render_template('login.html')
+
+# @app.route("/login", methods=['POST'])
+# def post_login():
+# 	return 
+
+# @app.route("/view")
+
+def add_user(name, email, password):
 	#make connection to database
 	db = MySQLdb.connect(host="localhost", user="root", passwd="root", db="filebox")
 	# you must create a Cursor object to let you execute queries
 	cur = db.cursor()
 	cur.execute("""INSERT INTO USERS (NAME, EMAIL, PASSWORD) VALUES (%s, %s, %s )""", (name, email, password) )
-	
 	# cur.execute("SELECT VERSION()")
 	# # Fetch a single row using fetchone() method.
 	# data = cur.fetchone()
@@ -57,14 +74,14 @@ def post_register():
 	db.commit()
 	cur.close()
 	db.close()
-	return render_template('home.html', name=name)
 
-@app.route("/login")
-def get_login():
-	return render_template('login.html')
+def create_user_folder(name):
+	os.mkdir(path + '/files' + '/' + name)
 
 
 admin.add_view(FileAdmin(path+'/files/' , name='Files'))  
 
 if __name__ == '__main__':
 	app.run()
+
+
