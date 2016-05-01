@@ -4,6 +4,7 @@ import MySQLdb
 
 from flask import Flask, render_template, request, json, redirect
 from flask_admin import Admin, BaseView, expose
+from flask.ext.basicauth import BasicAuth
 from flask.ext.admin.contrib.fileadmin import FileAdmin
 import os
 import os.path as op
@@ -21,12 +22,9 @@ class PageView(BaseView):
 		return self.render('admin/index.html')
 
 
-
-
-
 @app.route("/")
 def main():
-	return render_template('index.html')
+	return render_template('mydrive.html')
 
 @app.route("/register", methods=['GET'])
 def get_register():
@@ -66,7 +64,31 @@ def mydrive_get():
 @app.route("/mydrive", methods=['POST'])
 def mydrive_post():
 	name = request.form['inputName']
-	return redirect('/admin/fileadmin/b/'+name)
+	password = request.form['inputPassword']
+	if(user_authorised(name, password)):
+		return redirect('/admin/fileadmin/b/'+name)
+	else:
+		return json.dumps({"error":"access denied"})
+
+
+@app.route("/admin/fileadmin/", methods=['POST', 'GET'])
+def admin_route():
+	return redirect('/')
+
+
+def user_authorised( name, password ):
+	db = MySQLdb.connect(host="localhost", user="root", passwd="root", db="filebox")
+	cur = db.cursor()
+	cur.execute("SELECT PASSWORD FROM USERS WHERE NAME = %s", (name,) )
+	user = cur.fetchone()
+	db.commit()
+	cur.close()
+	db.close()
+	if(user[0]==password):
+		return True
+	else:
+		return False
+
 
 def add_user(name, email, password):
 	#make connection to database
